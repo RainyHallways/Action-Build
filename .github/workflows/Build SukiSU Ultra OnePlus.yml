@@ -6,7 +6,7 @@ on:
         type: choice
         description: "配置文件"
         required: true
-        default: oneplus_ace2_pro_v
+        default: oneplus_13
         options:
           - oneplus_nord_ce4_lite_5g_v
           - oneplus_nord_ce4_v
@@ -81,6 +81,16 @@ on:
       SCHED:
         type: boolean
         description: "是否添加风驰驱动？"
+        required: true
+        default: false
+      LXC_DOCKER:
+        type: boolean
+        description: "是否添加LXC/Docker支持？"
+        required: true
+        default: false
+      KVM:
+        type: boolean
+        description: "是否添加KVM支持？"
         required: true
         default: false
       ZRAM:
@@ -762,6 +772,35 @@ jobs:
 
           # 移除构建审查
           sed -i 's/check_defconfig//' ./common/build.config.gki
+      
+      - name: Enable lxc and docker
+        if: ${{ github.event.inputs.LXC_DOCKER == 'true' }}
+        run: |
+          cd $GITHUB_WORKSPACE/kernel_workspace
+          axel https://github.com/jqtmviyu/LXC_KernelSU_Action/raw/refs/heads/main/patches/lxc-docker-config.conf
+          cat lxc-docker-config.conf >> android-kernel/arch/arm64/configs/${{ env.KERNEL_CONFIG }}
+          echo "# CONFIG_ANDROID_PARANOID_NETWORK is not set" >> android-kernel/arch/arm64/configs/${{ env.KERNEL_CONFIG }}
+
+      - name: Add runc Patches
+        run: |
+          cd $GITHUB_WORKSPACE/kernel_workspace
+          axel https://github.com/jqtmviyu/LXC_KernelSU_Action/raw/refs/heads/main/patches/runcpatch.sh
+          chmod a+x runcpatch.sh
+          if [ -f android-kernel/kernel/cgroup.c ]; then
+          ./runcpatch.sh android-kernel/kernel/cgroup.c
+          fi
+          if [ -f android-kernel/kernel/cgroup/cgroup.c ]; then
+          ./runcpatch.sh android-kernel/kernel/cgroup/cgroup.c
+          fi
+      
+      - name: Enable KVM
+        if: ${{ github.event.inputs.KVM == 'true' }}
+        run: |
+          cd $GITHUB_WORKSPACE/kernel_workspace
+          echo "CONFIG_VIRTUALIZATION=y" >> android-kernel/arch/arm64/configs/${{ env.KERNEL_CONFIG }}
+          echo "CONFIG_KVM=y" >> android-kernel/arch/arm64/configs/${{ env.KERNEL_CONFIG }}
+          echo "CONFIG_VHOST_NET=y" >> android-kernel/arch/arm64/configs/${{ env.KERNEL_CONFIG }}
+          echo "CONFIG_VHOST_CROSS_ENDIAN_LEGACY=y" >> android-kernel/arch/arm64/configs/${{ env.KERNEL_CONFIG }}
 
       # 风驰内核，以 sm8750 为主体，其他 CPU 可能无效或者无法跑出
       - name: Add sched_ext
