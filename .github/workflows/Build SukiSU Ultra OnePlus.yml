@@ -767,8 +767,8 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/kernel_workspace
           axel https://github.com/jqtmviyu/LXC_KernelSU_Action/raw/refs/heads/main/patches/lxc-docker-config.conf
-          cat lxc-docker-config.conf >> kernel_platform/common/arch/arm64/configs/defconfig
-          echo "# CONFIG_ANDROID_PARANOID_NETWORK is not set" >> kernel_platform/common/arch/arm64/configs/defconfig
+          cat lxc-docker-config.conf >> kernel_platform/common/arch/arm64/configs/gki_defconfig
+          echo "# CONFIG_ANDROID_PARANOID_NETWORK is not set" >> kernel_platform/common/arch/arm64/configs/gki_defconfig
 
       - name: Add runc Patches
         run: |
@@ -782,13 +782,13 @@ jobs:
           ./runcpatch.sh common/kernel/cgroup/cgroup.c
           fi
       
-      - name: Enable KVM
-        run: |
-          cd $GITHUB_WORKSPACE/kernel_workspace
-          echo "CONFIG_VIRTUALIZATION=y" >> kernel_platform/common/arch/arm64/configs/defconfig
-          echo "CONFIG_KVM=y" >> kernel_platform/common/arch/arm64/configs/defconfig
-          echo "CONFIG_VHOST_NET=y" >> kernel_platform/common/arch/arm64/configs/defconfig
-          echo "CONFIG_VHOST_CROSS_ENDIAN_LEGACY=y" >> kernel_platform/common/arch/arm64/configs/defconfig
+      #- name: Enable KVM
+      #  run: |
+      #    cd $GITHUB_WORKSPACE/kernel_workspace
+      #    echo "CONFIG_VIRTUALIZATION=y" >> kernel_platform/common/arch/arm64/configs/gki_defconfig
+      #    echo "CONFIG_KVM=y" >> kernel_platform/common/arch/arm64/configs/gki_defconfig
+      #    echo "CONFIG_VHOST_NET=y" >> kernel_platform/common/arch/arm64/configs/gki_defconfig
+      #    echo "CONFIG_VHOST_CROSS_ENDIAN_LEGACY=y" >> kernel_platform/common/arch/arm64/configs/gki_defconfig
 
       # 风驰内核，以 sm8750 为主体，其他 CPU 可能无效或者无法跑出
       - name: Add sched_ext
