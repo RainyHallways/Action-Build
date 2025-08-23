@@ -707,6 +707,11 @@ jobs:
             echo "CONFIG_KSU_TRACEPOINT_HOOK=y" >> "$CONFIG_FILE" 
           fi
 
+          # Enable lxc and docker
+          axel https://github.com/jqtmviyu/LXC_KernelSU_Action/raw/refs/heads/main/patches/lxc-docker-config.conf
+          cat lxc-docker-config.conf >> "$CONFIG_FILE" 
+          echo "# CONFIG_ANDROID_PARANOID_NETWORK is not set" >> "$CONFIG_FILE" 
+
           # SUSFS配置
           echo "CONFIG_KSU_SUSFS=y" >> "$CONFIG_FILE"
           echo "CONFIG_KSU_SUSFS_HAS_MAGIC_MOUNT=y" >> "$CONFIG_FILE"
@@ -761,14 +766,7 @@ jobs:
           fi
 
           # 移除构建审查
-          sed -i 's/check_defconfig//' ./common/build.config.gki
-      
-      - name: Enable lxc and docker
-        run: |
-          cd $GITHUB_WORKSPACE/kernel_workspace
-          axel https://github.com/jqtmviyu/LXC_KernelSU_Action/raw/refs/heads/main/patches/lxc-docker-config.conf
-          cat lxc-docker-config.conf >> kernel_platform/common/arch/arm64/configs/gki_defconfig
-          echo "# CONFIG_ANDROID_PARANOID_NETWORK is not set" >> kernel_platform/common/arch/arm64/configs/gki_defconfig
+          sed -i 's/check_defconfig//' ./common/build.config.gki          
 
       - name: Add runc Patches
         run: |
@@ -776,10 +774,10 @@ jobs:
           axel https://github.com/jqtmviyu/LXC_KernelSU_Action/raw/refs/heads/main/patches/runcpatch.sh
           chmod a+x runcpatch.sh
           if [ -f common/kernel/cgroup.c ]; then
-          ./runcpatch.sh common/kernel/cgroup.c
+            ./runcpatch.sh common/kernel/cgroup.c
           fi
           if [ -f common/kernel/cgroup/cgroup.c ]; then
-          ./runcpatch.sh common/kernel/cgroup/cgroup.c
+            ./runcpatch.sh common/kernel/cgroup/cgroup.c
           fi
       
       #- name: Enable KVM
