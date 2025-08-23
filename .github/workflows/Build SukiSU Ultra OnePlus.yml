@@ -770,7 +770,7 @@ jobs:
 
       - name: Add runc Patches
         run: |
-          cd $GITHUB_WORKSPACE/kernel_workspace
+          cd $GITHUB_WORKSPACE/kernel_workspace/kernel_platform
           axel https://github.com/jqtmviyu/LXC_KernelSU_Action/raw/refs/heads/main/patches/runcpatch.sh
           chmod a+x runcpatch.sh
           if [ -f common/kernel/cgroup.c ]; then
